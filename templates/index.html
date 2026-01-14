@@ -24,7 +24,7 @@
       <!-- LEFT -->
       <div class="left">
         <div class="section-title">Input Parameters</div>
-        <form method="post" action="{{ url_for('calculator') }}" class="calc-grid">
+        <form method="post" action="{{ url_for('calculator') }}" class="calc-grid" id="calcForm">
           <!-- Row 1: FREKUENSI + A -->
           <div class="lbl">FREKUENSI</div>
           <div class="val a-box">
@@ -74,7 +74,7 @@
           <div class="box-letter b-letter">B</div>
 
           {% if hasil %}
-          <div class="result-list">
+          <div class="result-list" id="resultArea">
             <div class="r"><span>Panjang sisi patch (a)</span><b>{{ "%.2f"|format(hasil.a_mm) }} mm</b></div>
             <div class="r"><span>Ukuran substrat ws</span><b>{{ "%.2f"|format(hasil.ws_mm) }} mm</b></div>
             <div class="r"><span>Ukuran substrat ls</span><b>{{ "%.2f"|format(hasil.ls_mm) }} mm</b></div>
@@ -84,8 +84,37 @@
             <div class="r"><span>lf = λg/2</span><b>{{ "%.2f"|format(hasil.lf_mm) }} mm</b></div>
           </div>
           {% else %}
-            <div class="b-placeholder">Hasil perhitungan muncul di sini</div>
+            <div class="b-placeholder" id="resultArea">Hasil perhitungan muncul di sini</div>
           {% endif %}
+        </div>
+
+        <div class="section-title">CST Upload</div>
+        <div class="upload-card">
+          <form method="post" action="{{ url_for('cst_upload') }}" enctype="multipart/form-data" class="upload-form" id="cstForm">
+            <div class="upload-row">
+              <input type="file" name="cst_file" accept=".jpg,.jpeg,.png,.csv">
+            </div>
+            <div class="upload-options">
+              <label><input type="radio" name="display_mode" value="image" checked> Gambar saja</label>
+              <label><input type="radio" name="display_mode" value="graph"> Grafik saja</label>
+              <label><input type="radio" name="display_mode" value="both"> Gambar + Grafik</label>
+            </div>
+            <button class="btn-hit" type="submit">UPLOAD</button>
+          </form>
+
+          <div class="upload-message" id="uploadMessage">
+            {% if cst_result and cst_result.message %}{{ cst_result.message }}{% endif %}
+          </div>
+
+          <div class="upload-preview{% if not (cst_result and cst_result.image_url) %} hidden{% endif %}" id="uploadPreview">
+            {% if cst_result and cst_result.image_url %}
+            <img src="{{ cst_result.image_url }}" alt="CST Preview">
+            {% endif %}
+          </div>
+
+          <div class="upload-chart{% if not (cst_result and cst_result.csv_labels) %} hidden{% endif %}" id="uploadChartWrap">
+            <canvas id="cstChart"></canvas>
+          </div>
         </div>
       </div>
 
@@ -94,16 +123,158 @@
         <div class="section-title">Visualization</div>
         <div class="box c-box">
           <div class="box-letter">C</div>
-          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)">
+          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC">
         </div>
 
         <div class="box d-box">
           <div class="box-letter">D</div>
-          <img src="{{ url_for('static', filename=img_d) }}" alt="Gambar Antena (D)">
+          <img src="{{ url_for('static', filename=img_d) }}" alt="Gambar Antena (D)" id="imgD">
         </div>
       </div>
     </div>
     <div class="creator center">Pembuat: Riswan Amin Sitorus (NIM 190402005)</div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const calcForm = document.getElementById("calcForm");
+    const resultArea = document.getElementById("resultArea");
+    const imgC = document.getElementById("imgC");
+    const imgD = document.getElementById("imgD");
+    const cstForm = document.getElementById("cstForm");
+    const uploadMessage = document.getElementById("uploadMessage");
+    const uploadPreview = document.getElementById("uploadPreview");
+    const uploadChartWrap = document.getElementById("uploadChartWrap");
+    const chartCanvas = document.getElementById("cstChart");
+    let cstChart = null;
+    const initialImage = "{% if cst_result and cst_result.image_url %}{{ cst_result.image_url }}{% endif %}";
+    const initialMode = "{% if cst_result and cst_result.display_mode %}{{ cst_result.display_mode }}{% endif %}";
+    const initialLabels = {% if cst_result and cst_result.csv_labels %}{{ cst_result.csv_labels | safe }}{% else %}null{% endif %};
+    const initialValues = {% if cst_result and cst_result.csv_values %}{{ cst_result.csv_values | safe }}{% else %}null{% endif %};
+
+    function setResultMessage(text) {
+      if (!resultArea) return;
+      resultArea.classList.remove("result-list");
+      resultArea.classList.add("b-placeholder");
+      resultArea.textContent = text;
+    }
+
+    function renderResults(hasil) {
+      if (!resultArea) return;
+      resultArea.classList.remove("b-placeholder");
+      resultArea.classList.add("result-list");
+      resultArea.innerHTML = `
+        <div class="r"><span>Panjang sisi patch (a)</span><b>${hasil.a_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>Ukuran substrat ws</span><b>${hasil.ws_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>Ukuran substrat ls</span><b>${hasil.ls_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>I¯0 = c/f</span><b>${hasil.lambda0_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>Iæeff</span><b>${hasil.eps_eff.toFixed(3)}</b></div>
+        <div class="r"><span>I¯g</span><b>${hasil.lambda_g_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>lf = I¯g/2</span><b>${hasil.lf_mm.toFixed(2)} mm</b></div>
+      `;
+    }
+
+    function renderChart(labels, values) {
+      if (!chartCanvas) return;
+      if (cstChart) cstChart.destroy();
+      cstChart = new Chart(chartCanvas, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "S11 / Magnitude",
+            data: values,
+            borderColor: "#1f7a8c",
+            backgroundColor: "rgba(31,122,140,0.15)",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.25
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: "Frequency" } },
+            y: { title: { display: true, text: "Magnitude (dB)" } }
+          }
+        }
+      });
+    }
+
+    if (calcForm) {
+      calcForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(calcForm);
+        try {
+          const resp = await fetch("{{ url_for('calculator_api') }}", {
+            method: "POST",
+            body: formData
+          });
+          const data = await resp.json();
+          if (!data.ok) {
+            setResultMessage(data.message || "Gagal menghitung.");
+            return;
+          }
+          renderResults(data.hasil);
+          if (imgC) imgC.src = data.img_c;
+          if (imgD) imgD.src = data.img_d;
+        } catch (err) {
+          setResultMessage("Gagal menghubungi server.");
+        }
+      });
+    }
+
+    if (cstForm) {
+      cstForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(cstForm);
+        uploadMessage.textContent = "Mengunggah...";
+        try {
+          const resp = await fetch("{{ url_for('cst_upload_api') }}", {
+            method: "POST",
+            body: formData
+          });
+          const data = await resp.json();
+          if (!data.ok) {
+            uploadMessage.textContent = data.message || "Upload gagal.";
+            uploadPreview.classList.add("hidden");
+            uploadChartWrap.classList.add("hidden");
+            return;
+          }
+          uploadMessage.textContent = "";
+
+          if (data.image_url && data.display_mode !== "graph") {
+            uploadPreview.innerHTML = `<img src="${data.image_url}" alt="CST Preview">`;
+            uploadPreview.classList.remove("hidden");
+          } else {
+            uploadPreview.classList.add("hidden");
+          }
+
+          if (data.csv_labels && data.display_mode !== "image") {
+            uploadChartWrap.classList.remove("hidden");
+            renderChart(data.csv_labels, data.csv_values);
+          } else {
+            uploadChartWrap.classList.add("hidden");
+            if (cstChart) {
+              cstChart.destroy();
+              cstChart = null;
+            }
+          }
+        } catch (err) {
+          uploadMessage.textContent = "Gagal menghubungi server.";
+        }
+      });
+    }
+
+    if (initialImage && initialMode !== "graph") {
+      uploadPreview.innerHTML = `<img src="${initialImage}" alt="CST Preview">`;
+      uploadPreview.classList.remove("hidden");
+    }
+    if (initialLabels && initialMode !== "image") {
+      uploadChartWrap.classList.remove("hidden");
+      renderChart(initialLabels, initialValues || []);
+    }
+  </script>
 </body>
 </html>
