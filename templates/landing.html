@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Landing - Kalkulator Antena Mikrostrip</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="landing">
+    <div class="landing-hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Microstrip Lab Toolkit</div>
+        <h1>Kalkulator Antena Mikrostrip Patch Segitiga</h1>
+        <p>
+          Hitung parameter desain dengan cepat, rapi, dan siap presentasi.
+          Visualisasi langsung menyesuaikan frekuensi pilihan.
+        </p>
+        <div class="hero-actions">
+        </div>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-value">5</span>
+            <span class="metric-label">Opsinya GHz</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">3</span>
+            <span class="metric-label">Input Utama</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">7</span>
+            <span class="metric-label">Output Ukuran</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="pulse"></span>
+          <span>Preview Perhitungan</span>
+        </div>
+        <div class="hero-card-body">
+          <div class="card-row"><span>f</span><b>2.4 GHz</b></div>
+          <div class="card-row"><span>er</span><b>4.4</b></div>
+          <div class="card-row"><span>h</span><b>1.6 mm</b></div>
+          <div class="card-row"><span>a</span><b>xx.xx mm</b></div>
+          <div class="card-row"><span>lambda0</span><b>xx.xx mm</b></div>
+        </div>
+        <div class="hero-card-foot">Siap diunduh atau dicatat</div>
+      </div>
+    </div>
+
+    <div id="fitur" class="landing-grid">
+      <div class="feature-card">
+        <div class="feature-title">Form Terstruktur</div>
+        <p>Input ringkas dengan label jelas dan fokus pada angka penting.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Hasil Rapi</div>
+        <p>Output tersusun agar mudah dibaca dan dibandingkan.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Visual Responsif</div>
+        <p>Tampilan modern yang tetap nyaman di desktop dan mobile.</p>
+      </div>
+    </div>
+
+    <div class="landing-steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <div>
+          <div class="step-title">Pilih Frekuensi</div>
+          <div class="step-text">Gunakan opsi yang tersedia sesuai kebutuhan desain.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <div>
+          <div class="step-title">Isi Parameter</div>
+          <div class="step-text">Masukkan nilai er dan ketebalan substrat.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <div>
+          <div class="step-title">Dapatkan Output</div>
+          <div class="step-text">Lihat hasil dimensi dan visualisasi antena.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">
+      <div>
+        <div>Siap mulai? Masuk ke kalkulator sekarang.</div>
+        <div class="creator">Pembuat: Riswan Amin Sitorus (NIM 190402005)</div>
+      </div>
+      <a class="btn-primary" href="{{ url_for('calculator') }}">Buka Kalkulator</a>
+    </div>
+  </div>
+</body>
+</html>

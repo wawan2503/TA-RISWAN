@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kalkulator Antenna Mikrostrip Patch Segitiga</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="sheet">
+    <div class="header-pill">
+      <div class="header-text">
+        KALKULATOR ANTENNA<br>
+        MIKROSTRIP PACTH SEGITIGA
+      </div>
+    </div>
+    <div class="meta-row">
+      <span class="chip">Patch Triangle</span>
+      <span class="chip">Microstrip</span>
+      <span class="chip">Calculator</span>
+    </div>
+
+    <div class="main">
+      <!-- LEFT -->
+      <div class="left">
+        <div class="section-title">Input Parameters</div>
+        <form method="post" action="{{ url_for('calculator') }}" class="calc-grid">
+          <!-- Row 1: FREKUENSI + A -->
+          <div class="lbl">FREKUENSI</div>
+          <div class="val a-box">
+            <div class="a-tag">A</div>
+            <select name="freq">
+              {% for f in freq_options %}
+                <option value="{{f}}" {% if form.freq == f %}selected{% endif %}>{{f}} GHz</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="lbl">Bahan substrat (εr)</div>
+          <div class="val">
+            <input value="{{ form.substrat }}" disabled>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="lbl">Tebal substrat (h)</div>
+          <div class="val">
+            <input name="h" value="{{ form.h }}">
+          </div>
+
+          <!-- Row 4 -->
+          <div class="lbl">Konstanta dielektrik</div>
+          <div class="val">
+            <input name="er" value="{{ form.er }}">
+          </div>
+
+          <!-- Row 5 -->
+          <div class="lbl">Impedansi konduktor</div>
+          <div class="val">
+            <input value="{{ form.z0 }}" disabled>
+          </div>
+
+          <!-- Row 6: Wo (ketentuan) -->
+          <div class="lbl">Wo (ketentuan)</div>
+          <div class="val">
+            <input name="wo" value="{{ form.wo }}">
+          </div>
+
+          <button class="btn-hit" type="submit">HITUNG</button>
+        </form>
+
+        <!-- B box -->
+        <div class="box b-box">
+          <div class="box-letter b-letter">B</div>
+
+          {% if hasil %}
+          <div class="result-list">
+            <div class="r"><span>Panjang sisi patch (a)</span><b>{{ "%.2f"|format(hasil.a_mm) }} mm</b></div>
+            <div class="r"><span>Ukuran substrat ws</span><b>{{ "%.2f"|format(hasil.ws_mm) }} mm</b></div>
+            <div class="r"><span>Ukuran substrat ls</span><b>{{ "%.2f"|format(hasil.ls_mm) }} mm</b></div>
+            <div class="r"><span>λ0 = c/f</span><b>{{ "%.2f"|format(hasil.lambda0_mm) }} mm</b></div>
+            <div class="r"><span>εeff</span><b>{{ "%.3f"|format(hasil.eps_eff) }}</b></div>
+            <div class="r"><span>λg</span><b>{{ "%.2f"|format(hasil.lambda_g_mm) }} mm</b></div>
+            <div class="r"><span>lf = λg/2</span><b>{{ "%.2f"|format(hasil.lf_mm) }} mm</b></div>
+          </div>
+          {% else %}
+            <div class="b-placeholder">Hasil perhitungan muncul di sini</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="section-title">Visualization</div>
+        <div class="box c-box">
+          <div class="box-letter">C</div>
+          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)">
+        </div>
+
+        <div class="box d-box">
+          <div class="box-letter">D</div>
+          <img src="{{ url_for('static', filename=img_d) }}" alt="Gambar Antena (D)">
+        </div>
+      </div>
+    </div>
+    <div class="creator center">Pembuat: Riswan Amin Sitorus (NIM 190402005)</div>
+  </div>
+</body>
+</html>
