@@ -1,18 +1,10 @@
 ﻿from flask import Flask, render_template, request, redirect, url_for, jsonify
-from pathlib import Path
-import csv
-import json
-import secrets
-from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 
 C0 = 3e8  # m/s
 FREQ_OPTIONS_GHZ = [1.8, 2.2, 2.3, 2.4, 3.3]  # sesuai PDF
-UPLOAD_DIR = Path("static/uploads")
-ALLOWED_IMAGE = {".jpg", ".jpeg", ".png"}
-ALLOWED_DATA = {".csv"}
-
 def calc(f_ghz: float, er: float, h_mm: float, wo_mm: float = 3.0):
     """
     Rumus (sesuai spesifikasi):
@@ -64,55 +56,6 @@ def get_default_form():
         "wo": 3.0
     }
 
-def parse_csv_data(file_stream):
-    text = file_stream.read().decode("utf-8-sig").splitlines()
-    if not text:
-        return None, "CSV kosong."
-
-    sample = text[0]
-    has_header = any(ch.isalpha() for ch in sample)
-
-    data = []
-    if has_header:
-        reader = csv.DictReader(text)
-        for row in reader:
-            if len(data) >= 1200:
-                break
-            x = None
-            y = None
-            for key in row.keys():
-                k = key.lower()
-                if x is None and ("freq" in k or "f" == k):
-                    try:
-                        x = float(row[key])
-                    except (ValueError, TypeError):
-                        pass
-                if y is None and ("s11" in k or "mag" in k or "db" in k):
-                    try:
-                        y = float(row[key])
-                    except (ValueError, TypeError):
-                        pass
-            if x is None or y is None:
-                continue
-            data.append((x, y))
-    else:
-        reader = csv.reader(text)
-        for row in reader:
-            if len(data) >= 1200:
-                break
-            if len(row) < 2:
-                continue
-            try:
-                x = float(row[0])
-                y = float(row[1])
-            except ValueError:
-                continue
-            data.append((x, y))
-
-    if not data:
-        return None, "CSV tidak dikenali. Pastikan ada kolom frekuensi dan S11/magnitudo."
-    return data, None
-
 @app.route("/", methods=["GET", "POST"])
 def landing():
     if request.method == "POST":
@@ -156,8 +99,7 @@ def calculator():
         form=form,
         hasil=hasil,
         img_c=img_c,
-        img_d=img_d,
-        cst_result=None
+        img_d=img_d
     )
 
 @app.route("/api/calculator", methods=["POST"])
@@ -185,94 +127,6 @@ def calculator_api():
         "img_c": url_for("static", filename=f"img/top_{k}.png"),
         "img_d": url_for("static", filename=f"img/view_{k}.png")
     })
-
-@app.route("/cst", methods=["POST"])
-def cst_upload():
-    form = get_default_form()
-    hasil = None
-    cst_result = {"message": "Tidak ada file yang diunggah."}
-
-    file = request.files.get("cst_file")
-    display_mode = request.form.get("display_mode", "image")
-    if not file or not file.filename:
-        cst_result = {"message": "Silakan pilih file CST terlebih dulu."}
-    else:
-        suffix = Path(file.filename).suffix.lower()
-        if suffix in ALLOWED_IMAGE:
-            UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-            safe_name = secure_filename(file.filename)
-            token = secrets.token_hex(6)
-            filename = f"{token}_{safe_name}"
-            file_path = UPLOAD_DIR / filename
-            file.save(file_path)
-            cst_result = {
-                "image_url": url_for("static", filename=f"uploads/{filename}"),
-                "display_mode": display_mode
-            }
-        elif suffix in ALLOWED_DATA:
-            data, error = parse_csv_data(file.stream)
-            if error:
-                cst_result = {"message": error, "display_mode": display_mode}
-            else:
-                labels = [d[0] for d in data]
-                values = [d[1] for d in data]
-                cst_result = {
-                    "csv_labels": json.dumps(labels),
-                    "csv_values": json.dumps(values),
-                    "display_mode": display_mode
-                }
-        else:
-            cst_result = {"message": "Format file belum didukung. Gunakan .jpg/.png atau .csv."}
-
-    k = key_freq(form["freq"])
-    img_c = f"img/top_{k}.png"
-    img_d = f"img/view_{k}.png"
-
-    return render_template(
-        "index.html",
-        freq_options=FREQ_OPTIONS_GHZ,
-        form=form,
-        hasil=hasil,
-        img_c=img_c,
-        img_d=img_d,
-        cst_result=cst_result
-    )
-
-@app.route("/api/cst", methods=["POST"])
-def cst_upload_api():
-    file = request.files.get("cst_file")
-    display_mode = request.form.get("display_mode", "image")
-    if not file or not file.filename:
-        return jsonify({"ok": False, "message": "Silakan pilih file CST terlebih dulu."}), 400
-
-    suffix = Path(file.filename).suffix.lower()
-    if suffix in ALLOWED_IMAGE:
-        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-        safe_name = secure_filename(file.filename)
-        token = secrets.token_hex(6)
-        filename = f"{token}_{safe_name}"
-        file_path = UPLOAD_DIR / filename
-        file.save(file_path)
-        return jsonify({
-            "ok": True,
-            "display_mode": display_mode,
-            "image_url": url_for("static", filename=f"uploads/{filename}")
-        })
-
-    if suffix in ALLOWED_DATA:
-        data, error = parse_csv_data(file.stream)
-        if error:
-            return jsonify({"ok": False, "message": error}), 400
-        labels = [d[0] for d in data]
-        values = [d[1] for d in data]
-        return jsonify({
-            "ok": True,
-            "display_mode": display_mode,
-            "csv_labels": labels,
-            "csv_values": values
-        })
-
-    return jsonify({"ok": False, "message": "Format file belum didukung. Gunakan .jpg/.png atau .csv."}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
