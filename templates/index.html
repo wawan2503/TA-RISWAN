@@ -1,17 +1,17 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kalkulator Antenna Mikrostrip Patch Segitiga</title>
+  <title>Kalkulator Antena Mikrostrip Patch Segitiga</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   <div class="sheet">
     <div class="header-pill">
       <div class="header-text">
-        KALKULATOR ANTENNA<br>
-        MIKROSTRIP PACTH SEGITIGA
+        KALKULATOR ANTENA<br>
+        MIKROSTRIP PATCH SEGITIGA
       </div>
     </div>
     <div class="meta-row">
@@ -23,7 +23,7 @@
     <div class="main">
       <!-- LEFT -->
       <div class="left">
-        <div class="section-title">Input Antena</div>
+        <div class="section-title">Parameter Masukan</div>
         <form method="post" action="{{ url_for('calculator') }}" class="calc-grid" id="calcForm">
           <!-- Row 1: FREKUENSI + A -->
           <div class="lbl">FREKUENSI</div>
@@ -37,7 +37,7 @@
           </div>
 
           <!-- Row 2 -->
-          <div class="lbl">Bahan substrat (εr)</div>
+          <div class="lbl">Bahan substrat</div>
           <div class="val">
             <input value="{{ form.substrat }}" disabled>
           </div>
@@ -49,7 +49,7 @@
           </div>
 
           <!-- Row 4 -->
-          <div class="lbl">Konstanta dielektrik</div>
+          <div class="lbl">Konstanta dielektrik (er)</div>
           <div class="val">
             <input name="er" value="{{ form.er }}">
           </div>
@@ -60,14 +60,43 @@
             <input value="{{ form.z0 }}" disabled>
           </div>
 
-          <!-- Row 6: Wo (ketentuan) -->
-          <div class="lbl">Wo (ketentuan)</div>
+          <!-- Row 6: t (ketentuan) -->
+          <div class="lbl">Tebal konduktor (t)</div>
           <div class="val">
-            <input name="wo" value="{{ form.wo }}">
+            <input value="0.035 mm" disabled>
+          </div>
+
+          <!-- Row 7: W0 (ketentuan) -->
+          <div class="lbl">Wo (ketentuan, mm)</div>
+          <div class="val">
+            <input name="wo" value="{{ form.wo }}" readonly>
           </div>
 
           <button class="btn-hit" type="submit">HITUNG</button>
         </form>
+
+        <details class="info-card">
+          <summary>Keterangan & Rumus</summary>
+          <div class="info-grid">
+            <div class="info-block">
+              <div class="info-title">Keterangan</div>
+              <ul>
+                <li><b>A</b> = Pilihan frekuensi (1.8, 2.2, 2.3, 2.4, 3.3 GHz)</li>
+                <li><b>B</b> = Hasil perhitungan</li>
+              </ul>
+            </div>
+            <div class="info-block">
+              <div class="info-title">Ringkasan Rumus Final</div>
+              <div class="formula">a = (2 x c) / (3 x f x sqrt(er))</div>
+              <div class="formula">ws = ls = 1.5 x a</div>
+              <div class="formula">lambda0 = c / f</div>
+              <div class="formula">eff = (er+1)/2 + (er-1)/2 x ( 1 / sqrt(1 + 12h/Wo) )</div>
+              <div class="formula">lambda_g = c / ( f x sqrt(eff) )</div>
+              <div class="formula">lf = lambda_g / 2</div>
+              <div class="info-note">Default (FR-4, h=1.6 mm, Wo=3 mm): eff ~ 3.3</div>
+            </div>
+          </div>
+        </details>
 
         <!-- B box -->
         <div class="box b-box">
@@ -75,16 +104,14 @@
 
           {% if hasil %}
           <div class="result-list" id="resultArea">
-            <div class="r"><span>Panjang sisi patch (a)</span><b>{{ "%.2f"|format(hasil.a_mm) }} mm</b></div>
-            <div class="r"><span>Ukuran substrat ws</span><b>{{ "%.2f"|format(hasil.ws_mm) }} mm</b></div>
-            <div class="r"><span>Ukuran substrat ls</span><b>{{ "%.2f"|format(hasil.ls_mm) }} mm</b></div>
-            <div class="r"><span>λ0 = c/f</span><b>{{ "%.2f"|format(hasil.lambda0_mm) }} mm</b></div>
-            <div class="r"><span>εeff</span><b>{{ "%.3f"|format(hasil.eps_eff) }}</b></div>
-            <div class="r"><span>λg</span><b>{{ "%.2f"|format(hasil.lambda_g_mm) }} mm</b></div>
-            <div class="r"><span>lf = λg/2</span><b>{{ "%.2f"|format(hasil.lf_mm) }} mm</b></div>
+            <div class="r"><span>Wo</span><b>{{ "%.2f"|format(hasil.wo) }} mm</b></div>
+            <div class="r"><span>lf</span><b>{{ "%.2f"|format(hasil.lf_mm) }} mm</b></div>
+            <div class="r"><span>a</span><b>{{ "%.2f"|format(hasil.a_mm) }} mm</b></div>
+            <div class="r"><span>ws</span><b>{{ "%.2f"|format(hasil.ws_mm) }} mm</b></div>
+            <div class="r"><span>ls</span><b>{{ "%.2f"|format(hasil.ls_mm) }} mm</b></div>
           </div>
           {% else %}
-            <div class="b-placeholder" id="resultArea">Hasil perhitungan muncul di sini</div>
+            <div class="b-placeholder" id="resultArea">Hasil perhitungan (Wo, lf, a, ws, ls) muncul di sini</div>
           {% endif %}
         </div>
 
@@ -120,7 +147,7 @@
 
       <!-- RIGHT -->
       <div class="right">
-        <div class="section-title">Visualization</div>
+        <div class="section-title">Gambar Antena</div>
         <div class="box c-box">
           <div class="box-letter">C</div>
           <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC">
@@ -164,13 +191,11 @@
       resultArea.classList.remove("b-placeholder");
       resultArea.classList.add("result-list");
       resultArea.innerHTML = `
-        <div class="r"><span>Panjang sisi patch (a)</span><b>${hasil.a_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>Ukuran substrat ws</span><b>${hasil.ws_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>Ukuran substrat ls</span><b>${hasil.ls_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>I¯0 = c/f</span><b>${hasil.lambda0_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>Iæeff</span><b>${hasil.eps_eff.toFixed(3)}</b></div>
-        <div class="r"><span>I¯g</span><b>${hasil.lambda_g_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>lf = I¯g/2</span><b>${hasil.lf_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>Wo</span><b>${hasil.wo.toFixed(2)} mm</b></div>
+        <div class="r"><span>lf</span><b>${hasil.lf_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>a</span><b>${hasil.a_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>ws</span><b>${hasil.ws_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>ls</span><b>${hasil.ls_mm.toFixed(2)} mm</b></div>
       `;
     }
 
@@ -278,3 +303,5 @@
   </script>
 </body>
 </html>
+
+

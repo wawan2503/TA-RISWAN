@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+﻿from flask import Flask, render_template, request, redirect, url_for, jsonify
 from pathlib import Path
 import csv
 import json
@@ -13,23 +13,28 @@ UPLOAD_DIR = Path("static/uploads")
 ALLOWED_IMAGE = {".jpg", ".jpeg", ".png"}
 ALLOWED_DATA = {".csv"}
 
-def calc(f_ghz: float, er: float, h_mm: float, wo: float = 3.0):
+def calc(f_ghz: float, er: float, h_mm: float, wo_mm: float = 3.0):
     """
-    Mengikuti ringkasan rumus pada PDF:
-    - a = 2c / (3 f sqrt(er))
-    - ws = ls = 1.5 a
-    - λ0 = c / f
-    - εeff = (er+1)/2 + (er-1)/2 * (1/sqrt(1 + 12*h/W))
-      ketentuan Wo = 3 -> W/h = Wo => W = Wo*h
-    - λg = c / (f*sqrt(εeff))
-    - lf = λg / 2
+    Rumus (sesuai spesifikasi):
+    - a = (2*c) / (3*f*sqrt(er))
+    - ws = ls = 1.5 * a
+    - lambda0 = c / f
+    - eff = (er+1)/2 + (er-1)/2 * ( 1 / sqrt(1 + 12h/W0) )
+    - lambda_g = c / (f * sqrt(eff))
+    - lf = lambda_g / 2
+
+    Catatan:
+    - Input f_ghz dalam GHz
+    - h_mm dan W0 (wo_mm) dalam mm
     """
     f_hz = f_ghz * 1e9
     h_m = h_mm / 1000.0
-    w_m = wo * h_m  # W = (W/h)*h
+    w_m = wo_mm / 1000.0  # Wo (lebar microstrip) dalam mm
+
+    if w_m <= 0:
+        raise ValueError("W0 harus lebih besar dari 0.")
 
     eps_eff = (er + 1) / 2 + (er - 1) / 2 * (1 / ((1 + 12 * (h_m / w_m)) ** 0.5))
-    lambda0_m = C0 / f_hz
     lambda_g_m = C0 / (f_hz * (eps_eff ** 0.5))
 
     a_m = (2 * C0) / (3 * f_hz * (er ** 0.5))
@@ -38,17 +43,11 @@ def calc(f_ghz: float, er: float, h_mm: float, wo: float = 3.0):
     lf_m = lambda_g_m / 2
 
     return {
-        "f_ghz": f_ghz,
-        "er": er,
-        "h_mm": h_mm,
-        "wo": wo,
-        "eps_eff": eps_eff,
+        "wo": wo_mm,
+        "lf_mm": lf_m * 1000,
         "a_mm": a_m * 1000,
         "ws_mm": ws_m * 1000,
         "ls_mm": ls_m * 1000,
-        "lambda0_mm": lambda0_m * 1000,
-        "lambda_g_mm": lambda_g_m * 1000,
-        "lf_mm": lf_m * 1000,
     }
 
 def key_freq(f_ghz: float) -> str:
@@ -61,7 +60,7 @@ def get_default_form():
         "substrat": "FR-4",
         "h": 1.6,
         "er": 4.4,
-        "z0": "50 OHM",
+        "z0": "50 Ohm",
         "wo": 3.0
     }
 
@@ -139,8 +138,12 @@ def calculator():
             wo = form["wo"]
 
         if freq in FREQ_OPTIONS_GHZ:
-            hasil = calc(freq, er, h, wo)
-            form.update({"freq": freq, "er": er, "h": h, "wo": wo})
+            try:
+                hasil = calc(freq, er, h, wo)
+            except ValueError:
+                hasil = None
+            else:
+                form.update({"freq": freq, "er": er, "h": h, "wo": wo})
 
     # gambar C dan D ikut frekuensi
     k = key_freq(form["freq"])
@@ -171,7 +174,10 @@ def calculator_api():
     if freq not in FREQ_OPTIONS_GHZ:
         return jsonify({"ok": False, "message": "Frekuensi tidak tersedia."}), 400
 
-    hasil = calc(freq, er, h, wo)
+    try:
+        hasil = calc(freq, er, h, wo)
+    except ValueError as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 400
     k = key_freq(freq)
     return jsonify({
         "ok": True,
@@ -270,3 +276,4 @@ def cst_upload_api():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
