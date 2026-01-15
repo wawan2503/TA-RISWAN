@@ -66,11 +66,7 @@
             <input value="0.035 mm" disabled>
           </div>
 
-          <!-- Row 7: W0 (ketentuan) -->
-          <div class="lbl">Wo (ketentuan, mm)</div>
-          <div class="val">
-            <input name="wo" value="{{ form.wo }}" readonly>
-          </div>
+          <input type="hidden" name="wo" value="{{ form.wo }}">
 
           <button class="btn-hit" type="submit">HITUNG</button>
         </form>
