@@ -5,6 +5,31 @@ app = Flask(__name__)
 
 C0 = 3e8  # m/s
 FREQ_OPTIONS_GHZ = [1.8, 2.2, 2.3, 2.4, 3.3]  # sesuai PDF
+CST_FREQ_DIR = {
+    1.8: "1.8",
+    2.2: "22",
+    2.3: "23",
+    2.4: "24",
+    3.3: "33",
+}
+
+
+def cst_image_relpath(freq_ghz: float, filename: str) -> str:
+    freq_dir = CST_FREQ_DIR.get(freq_ghz)
+    if not freq_dir:
+        raise ValueError("Frekuensi tidak tersedia.")
+    return f"img/gambar cst/{freq_dir}/{filename}"
+
+
+def cst_image_urls(freq_ghz: float) -> dict:
+    return {
+        "antena": url_for("static", filename=cst_image_relpath(freq_ghz, "antena.png")),
+        "gain": url_for("static", filename=cst_image_relpath(freq_ghz, "gain.png")),
+        "pola": url_for("static", filename=cst_image_relpath(freq_ghz, "pola.png")),
+        "return_loss": url_for("static", filename=cst_image_relpath(freq_ghz, "RETURN LOSS.png")),
+        "vswr": url_for("static", filename=cst_image_relpath(freq_ghz, "VSWR.png")),
+    }
+
 def calc(f_ghz: float, er: float, h_mm: float, wo_mm: float = 3.0):
     """
     Rumus (sesuai spesifikasi):
@@ -88,10 +113,13 @@ def calculator():
             else:
                 form.update({"freq": freq, "er": er, "h": h, "wo": wo})
 
-    # gambar C dan D ikut frekuensi
-    k = key_freq(form["freq"])
-    img_c = f"img/top_{k}.png"     # kotak C (top view)
-    img_d = f"img/view_{k}.png"    # kotak D (3D / pola radiasi / dll)
+    img_c = cst_image_relpath(form["freq"], "antena.png")
+    img_gain = cst_image_relpath(form["freq"], "gain.png")
+    img_pola = cst_image_relpath(form["freq"], "pola.png")
+    img_return_loss = cst_image_relpath(form["freq"], "RETURN LOSS.png")
+    img_vswr = cst_image_relpath(form["freq"], "VSWR.png")
+
+    freq_image_urls = {str(f): cst_image_urls(f) for f in FREQ_OPTIONS_GHZ}
 
     return render_template(
         "index.html",
@@ -99,7 +127,11 @@ def calculator():
         form=form,
         hasil=hasil,
         img_c=img_c,
-        img_d=img_d
+        img_gain=img_gain,
+        img_pola=img_pola,
+        img_return_loss=img_return_loss,
+        img_vswr=img_vswr,
+        freq_image_urls=freq_image_urls,
     )
 
 @app.route("/api/calculator", methods=["POST"])
@@ -120,12 +152,13 @@ def calculator_api():
         hasil = calc(freq, er, h, wo)
     except ValueError as exc:
         return jsonify({"ok": False, "message": str(exc)}), 400
-    k = key_freq(freq)
+    imgs = cst_image_urls(freq)
     return jsonify({
         "ok": True,
         "hasil": hasil,
-        "img_c": url_for("static", filename=f"img/top_{k}.png"),
-        "img_d": url_for("static", filename=f"img/view_{k}.png")
+        "imgs": imgs,
+        "img_c": imgs["antena"],
+        "img_d": imgs["pola"],
     })
 
 if __name__ == "__main__":

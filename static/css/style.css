@@ -393,6 +393,11 @@ body{
 
 .left{padding-right:10px;}
 .right{padding-left:10px;display:flex;flex-direction:column;gap:16px;}
+.plots-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px;
+}
 
 .section-title{
   font-size:12px;
@@ -634,11 +639,18 @@ body{
 
 .c-box{height:220px;animation:fadeUp 650ms ease-out 260ms both;}
 .d-box{height:280px;animation:fadeUp 650ms ease-out 360ms both;}
+.thumb-box{height:190px;animation:fadeUp 650ms ease-out 360ms both;}
 
 .c-box .box-letter, .d-box .box-letter{
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
+}
+.thumb-box .box-letter{
+  top:10px;
+  left:12px;
+  transform:none;
+  opacity:0.9;
 }
 
 @keyframes floatIn{
@@ -677,6 +689,8 @@ body{
   .b-box{height:auto;padding-bottom:16px;}
   .c-box{height:200px;}
   .d-box{height:240px;}
+  .plots-grid{grid-template-columns:1fr;}
+  .thumb-box{height:200px;}
   .landing{padding:20px;}
   .landing-hero{padding:18px;}
   .hero-metrics{grid-template-columns:1fr;gap:10px;}

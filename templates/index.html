@@ -29,7 +29,7 @@
           <div class="lbl">FREKUENSI</div>
           <div class="val a-box">
             <div class="a-tag">A</div>
-            <select name="freq">
+            <select name="freq" id="freqSelect">
               {% for f in freq_options %}
                 <option value="{{f}}" {% if form.freq == f %}selected{% endif %}>{{f}} GHz</option>
               {% endfor %}
@@ -121,13 +121,22 @@
       <div class="right">
         <div class="section-title">Gambar Antena</div>
         <div class="box c-box">
-          <div class="box-letter">C</div>
           <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC">
         </div>
 
-        <div class="box d-box">
-          <div class="box-letter">D</div>
-          <img src="{{ url_for('static', filename=img_d) }}" alt="Gambar Antena (D)" id="imgD">
+        <div class="plots-grid" aria-label="Gambar hasil CST">
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=img_gain) }}" alt="Gain" id="imgGain">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=img_pola) }}" alt="Pola radiasi" id="imgPola">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=img_return_loss) }}" alt="Return Loss" id="imgReturnLoss">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=img_vswr) }}" alt="VSWR" id="imgVswr">
+          </div>
         </div>
       </div>
     </div>
@@ -138,7 +147,22 @@
     const calcForm = document.getElementById("calcForm");
     const resultArea = document.getElementById("resultArea");
     const imgC = document.getElementById("imgC");
-    const imgD = document.getElementById("imgD");
+    const imgGain = document.getElementById("imgGain");
+    const imgPola = document.getElementById("imgPola");
+    const imgReturnLoss = document.getElementById("imgReturnLoss");
+    const imgVswr = document.getElementById("imgVswr");
+    const freqSelect = document.getElementById("freqSelect");
+    const freqImageUrls = {{ freq_image_urls | tojson }};
+
+    function updateImagesForFreq(freqValue) {
+      const urls = freqImageUrls?.[freqValue];
+      if (!urls) return;
+      if (imgC) imgC.src = urls.antena;
+      if (imgGain) imgGain.src = urls.gain;
+      if (imgPola) imgPola.src = urls.pola;
+      if (imgReturnLoss) imgReturnLoss.src = urls.return_loss;
+      if (imgVswr) imgVswr.src = urls.vswr;
+    }
 
     function setResultMessage(text) {
       if (!resultArea) return;
@@ -175,12 +199,22 @@
             return;
           }
           renderResults(data.hasil);
-          if (imgC) imgC.src = data.img_c;
-          if (imgD) imgD.src = data.img_d;
+          if (imgC) imgC.src = data.imgs?.antena || data.img_c;
+          if (imgGain) imgGain.src = data.imgs?.gain;
+          if (imgPola) imgPola.src = data.imgs?.pola || data.img_d;
+          if (imgReturnLoss) imgReturnLoss.src = data.imgs?.return_loss;
+          if (imgVswr) imgVswr.src = data.imgs?.vswr;
         } catch (err) {
           setResultMessage("Gagal menghubungi server.");
         }
       });
+    }
+
+    if (freqSelect) {
+      freqSelect.addEventListener("change", () => {
+        updateImagesForFreq(freqSelect.value);
+      });
+      updateImagesForFreq(freqSelect.value);
     }
   </script>
 </body>
