@@ -9,7 +9,7 @@
   ],
   "functions": {
     "api/index.py": {
-      "includeFiles": "templates/**"
+      "includeFiles": "{templates,static}/**"
     }
   }
 }
