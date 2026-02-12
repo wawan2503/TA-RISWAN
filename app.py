@@ -115,8 +115,8 @@ def ensure_drive_txt_index() -> None:
         DRIVE_TXT_READY = True
 
 
-def drive_file_url(file_id: str) -> str:
-    return f"https://drive.google.com/uc?export=download&id={file_id}"
+def drive_file_url(file_id: str, export: str = "download") -> str:
+    return f"https://drive.google.com/uc?export={export}&id={file_id}"
 
 
 def drive_img_file_id(rel_path: str) -> str | None:
@@ -129,7 +129,7 @@ def drive_img_url(rel_path: str) -> str | None:
     file_id = drive_img_file_id(rel_path)
     if not file_id:
         return None
-    return drive_file_url(file_id)
+    return drive_file_url(file_id, export="view")
 
 
 def drive_txt_file_id(freq_ghz: float, source: str, kind: str) -> str | None:
