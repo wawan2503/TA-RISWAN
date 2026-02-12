@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
@@ -66,7 +66,7 @@
             <input value="0.035 mm" disabled>
           </div>
 
-          <input type="hidden" name="wo" value="{{ form.wo }}">
+          <input type="hidden" name="wf" value="{{ form.wf }}">
 
           <button class="btn-hit" type="submit">HITUNG</button>
         </form>
@@ -84,12 +84,13 @@
             <div class="info-block">
               <div class="info-title">Ringkasan Rumus Final</div>
               <div class="formula">a = (2 x c) / (3 x f x sqrt(er))</div>
-              <div class="formula">ws = ls = 1.5 x a</div>
+              <div class="formula">wg = lg = a + 6h</div>
+              <div class="formula">Ht = (akar3/2) x a</div>
               <div class="formula">lambda0 = c / f</div>
-              <div class="formula">eff = (er+1)/2 + (er-1)/2 x ( 1 / sqrt(1 + 12h/Wo) )</div>
+              <div class="formula">eff = (er+1)/2 + (er-1)/2 x ( 1 / sqrt(1 + 12h/Wf) )</div>
               <div class="formula">lambda_g = c / ( f x sqrt(eff) )</div>
               <div class="formula">lf = lambda_g / 2</div>
-              <div class="info-note">Default (FR-4, h=1.6 mm, Wo=3 mm): eff ~ 3.3</div>
+              <div class="info-note">Default (FR-4, h=1.6 mm, Wf=3 mm): eff ~ 3.3</div>
             </div>
           </div>
         </details>
@@ -100,15 +101,32 @@
 
           {% if hasil %}
           <div class="result-list" id="resultArea">
-            <div class="r"><span>Wo</span><b>{{ "%.2f"|format(hasil.wo) }} mm</b></div>
+            <div class="r"><span>Wf</span><b>{{ "%.2f"|format(hasil.wf) }} mm</b></div>
             <div class="r"><span>lf</span><b>{{ "%.2f"|format(hasil.lf_mm) }} mm</b></div>
             <div class="r"><span>a</span><b>{{ "%.2f"|format(hasil.a_mm) }} mm</b></div>
-            <div class="r"><span>ws</span><b>{{ "%.2f"|format(hasil.ws_mm) }} mm</b></div>
-            <div class="r"><span>ls</span><b>{{ "%.2f"|format(hasil.ls_mm) }} mm</b></div>
+            <div class="r"><span>wg</span><b>{{ "%.2f"|format(hasil.wg_mm) }} mm</b></div>
+            <div class="r"><span>lg</span><b>{{ "%.2f"|format(hasil.lg_mm) }} mm</b></div>
+            <div class="r"><span>Ht</span><b>{{ "%.2f"|format(hasil.ht_mm) }} mm</b></div>
           </div>
           {% else %}
-            <div class="b-placeholder" id="resultArea">Hasil perhitungan (Wo, lf, a, ws, ls) muncul di sini</div>
+            <div class="b-placeholder" id="resultArea">Hasil perhitungan (Wf, lf, a, wg, lg, Ht) muncul di sini</div>
           {% endif %}
+        </div>
+
+        <div class="section-title">Grafik AWR (File TXT)</div>
+        <div class="plots-grid graphs-full" aria-label="Grafik AWR">
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls_awr.gain) }}" alt="Grafik Gain (AWR)" id="imgGraphGainAwr" class="graph-thumb" data-title="Grafik Gain (AWR)" data-kind="gain" data-txt="{{ graph_data_urls_awr.gain or '' }}">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls_awr.return_loss) }}" alt="Grafik Return Loss (AWR)" id="imgGraphReturnLossAwr" class="graph-thumb" data-title="Grafik Return Loss (AWR)" data-kind="return_loss" data-txt="{{ graph_data_urls_awr.return_loss or '' }}">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls_awr.vswr) }}" alt="Grafik VSWR (AWR)" id="imgGraphVswrAwr" class="graph-thumb" data-title="Grafik VSWR (AWR)" data-kind="vswr" data-txt="{{ graph_data_urls_awr.vswr or '' }}">
+          </div>
+          <div class="box thumb-box" id="wrapGraphPolaAwr" {% if not graph_urls_awr.pola %}style="display:none"{% endif %}>
+            <img src="{{ url_for('static', filename=graph_urls_awr.pola) if graph_urls_awr.pola else '' }}" alt="Grafik Pola (AWR)" id="imgGraphPolaAwr" class="graph-thumb" data-title="Grafik Pola (AWR)" data-kind="pola" data-txt="{{ graph_data_urls_awr.pola or '' }}">
+          </div>
         </div>
 
       </div>
@@ -117,21 +135,34 @@
       <div class="right">
         <div class="section-title">Gambar Antena</div>
         <div class="box c-box">
-          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC">
+          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC" class="img-popup" data-title="Gambar Antena">
         </div>
 
         <div class="plots-grid" aria-label="Gambar hasil CST">
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_gain) }}" alt="Gain" id="imgGain">
+            <img src="{{ url_for('static', filename=img_gain) }}" alt="Gain" id="imgGain" class="img-popup" data-title="Gain">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_pola) }}" alt="Pola radiasi" id="imgPola">
+            <img src="{{ url_for('static', filename=img_pola) }}" alt="Pola radiasi" id="imgPola" class="img-popup" data-title="Pola Radiasi">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_return_loss) }}" alt="Return Loss" id="imgReturnLoss">
+            <img src="{{ url_for('static', filename=img_return_loss) }}" alt="Return Loss" id="imgReturnLoss" class="img-popup" data-title="Return Loss">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_vswr) }}" alt="VSWR" id="imgVswr">
+            <img src="{{ url_for('static', filename=img_vswr) }}" alt="VSWR" id="imgVswr" class="img-popup" data-title="VSWR">
+          </div>
+        </div>
+
+        <div class="section-title">Grafik CST (File TXT)</div>
+        <div class="plots-grid graphs-full" aria-label="Grafik CST">
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls.gain) }}" alt="Grafik Gain (CST)" id="imgGraphGain" class="graph-thumb" data-title="Grafik Gain (CST)" data-kind="gain" data-txt="{{ graph_data_urls.gain or '' }}">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls.return_loss) }}" alt="Grafik Return Loss (CST)" id="imgGraphReturnLoss" class="graph-thumb" data-title="Grafik Return Loss (CST)" data-kind="return_loss" data-txt="{{ graph_data_urls.return_loss or '' }}">
+          </div>
+          <div class="box thumb-box">
+            <img src="{{ url_for('static', filename=graph_urls.vswr) }}" alt="Grafik VSWR (CST)" id="imgGraphVswr" class="graph-thumb" data-title="Grafik VSWR (CST)" data-kind="vswr" data-txt="{{ graph_data_urls.vswr or '' }}">
           </div>
         </div>
       </div>
@@ -139,7 +170,20 @@
     <div class="creator center">Pembuat: Riswan Amin Sitorus (NIM 190402005)</div>
   </div>
 
-  <script>
+  <div class="graph-tooltip" id="graphTooltip" aria-hidden="true"></div>
+  <div class="graph-marker-line" id="graphMarkerLine" aria-hidden="true"></div>
+  <div class="graph-marker-dot" id="graphMarkerDot" aria-hidden="true"></div>
+
+  <div class="img-modal" id="imgModal" aria-hidden="true">
+  <div class="img-backdrop" data-close="true"></div>
+  <div class="img-dialog" role="dialog" aria-modal="true" aria-labelledby="imgModalTitle">
+    <button class="img-close" type="button" data-close="true" aria-label="Tutup">x</button>
+    <div class="img-title" id="imgModalTitle">Gambar</div>
+    <img src="" alt="" id="imgModalImg">
+  </div>
+</div>
+
+<script>
     const calcForm = document.getElementById("calcForm");
     const resultArea = document.getElementById("resultArea");
     const imgC = document.getElementById("imgC");
@@ -147,8 +191,261 @@
     const imgPola = document.getElementById("imgPola");
     const imgReturnLoss = document.getElementById("imgReturnLoss");
     const imgVswr = document.getElementById("imgVswr");
+    const imgGraphGain = document.getElementById("imgGraphGain");
+    const imgGraphReturnLoss = document.getElementById("imgGraphReturnLoss");
+    const imgGraphVswr = document.getElementById("imgGraphVswr");
+    const imgGraphGainAwr = document.getElementById("imgGraphGainAwr");
+    const imgGraphReturnLossAwr = document.getElementById("imgGraphReturnLossAwr");
+    const imgGraphVswrAwr = document.getElementById("imgGraphVswrAwr");
+    const wrapGraphPolaAwr = document.getElementById("wrapGraphPolaAwr");
+    const imgGraphPolaAwr = document.getElementById("imgGraphPolaAwr");
     const freqSelect = document.getElementById("freqSelect");
     const freqImageUrls = {{ freq_image_urls | tojson }};
+    const freqGraphUrls = {{ freq_graph_urls | tojson }};
+    const freqGraphUrlsAwr = {{ freq_graph_urls_awr | tojson }};
+    const freqGraphDataUrls = {{ freq_graph_data_urls | tojson }};
+    const freqGraphDataUrlsAwr = {{ freq_graph_data_urls_awr | tojson }};
+    const graphTooltip = document.getElementById("graphTooltip");
+    const graphMarkerLine = document.getElementById("graphMarkerLine");
+    const graphMarkerDot = document.getElementById("graphMarkerDot");
+    const imgModal = document.getElementById("imgModal");
+    const imgModalImg = document.getElementById("imgModalImg");
+    const imgModalTitle = document.getElementById("imgModalTitle");
+    const graphDataCache = new Map();
+    const graphMetaCache = new Map();
+    const tooltipConfig = {
+      decimalsX: 3,
+      decimals: {
+        gain: 2,
+        return_loss: 2,
+        vswr: 2,
+        pola: 2
+      },
+      units: {
+        gain: "dBi",
+        return_loss: "dB",
+        vswr: "",
+        pola: "dB"
+      }
+    };
+    const numberRegex = /[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?/g;
+    const plotPadding = { left: 0.12, right: 0.06, top: 0.1, bottom: 0.12 };
+
+    function clamp01(value) {
+      if (Number.isNaN(value)) return 0.5;
+      return Math.max(0, Math.min(1, value));
+    }
+
+    function graphMetaUrlForImg(img) {
+      if (!img) return "";
+      const src = img.getAttribute("src") || "";
+      if (!src) return "";
+      const clean = src.split("?")[0];
+      if (!clean.toLowerCase().endsWith(".png")) return "";
+      return clean.replace(/\.png$/i, ".meta.json");
+    }
+
+    async function getGraphMeta(img) {
+      const url = graphMetaUrlForImg(img);
+      if (!url) return null;
+      if (graphMetaCache.has(url)) return graphMetaCache.get(url);
+      try {
+        const resp = await fetch(url, { cache: "force-cache" });
+        if (!resp.ok) return null;
+        const meta = await resp.json();
+        if (meta) graphMetaCache.set(url, meta);
+        return meta;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function parseGraphData(text, kind) {
+      const lines = text.split(/\r?\n/);
+      const header = lines.slice(0, 3).join(" ").toLowerCase();
+      const rows = [];
+      for (const line of lines) {
+        if (!/\d/.test(line)) continue;
+        const matches = line.match(numberRegex);
+        if (!matches || matches.length < 2) continue;
+        rows.push(matches.map(Number));
+      }
+      if (!rows.length) return null;
+
+      const isAngle = header.includes("theta") || header.includes("angle") || header.includes("deg");
+      const hasAbsGain = header.includes("abs(gain)") || header.includes("abs(theta)") || header.includes("abs(phi)");
+      const yIdx = hasAbsGain && rows[0].length > 2 ? 2 : 1;
+      const xIdx = 0;
+      const x = [];
+      const y = [];
+      for (const row of rows) {
+        if (row.length <= yIdx) continue;
+        x.push(row[xIdx]);
+        y.push(row[yIdx]);
+      }
+      if (!x.length) return null;
+      const minX = Math.min(...x);
+      const maxX = Math.max(...x);
+      const minY = Math.min(...y);
+      const maxY = Math.max(...y);
+      let yLabel = "Value";
+      if (kind === "gain") yLabel = "Gain";
+      if (kind === "return_loss") yLabel = "Return Loss";
+      if (kind === "vswr") yLabel = "VSWR";
+      if (kind === "pola") yLabel = "Pola";
+      const xLabel = isAngle ? "Angle (deg)" : "Frequency (GHz)";
+      return { x, y, minX, maxX, minY, maxY, xLabel, yLabel };
+    }
+
+    async function getGraphData(url, kind) {
+      if (!url) return null;
+      if (graphDataCache.has(url)) return graphDataCache.get(url);
+      try {
+        const resp = await fetch(url, { cache: "force-cache" });
+        if (!resp.ok) return null;
+        const text = await resp.text();
+        const data = parseGraphData(text, kind);
+        if (data) graphDataCache.set(url, data);
+        return data;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function findNearestIndex(arr, value) {
+      let lo = 0;
+      let hi = arr.length - 1;
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const midVal = arr[mid];
+        if (midVal === value) return mid;
+        if (midVal < value) lo = mid + 1;
+        else hi = mid - 1;
+      }
+      if (lo <= 0) return 0;
+      if (lo >= arr.length) return arr.length - 1;
+      const prev = lo - 1;
+      return Math.abs(arr[prev] - value) <= Math.abs(arr[lo] - value) ? prev : lo;
+    }
+
+    async function showGraphTooltip(img, clientX, clientY) {
+      if (!graphTooltip) return;
+      const url = img.dataset.txt;
+      const kind = img.dataset.kind || "gain";
+      if (!url) {
+        hideGraphTooltip();
+        return;
+      }
+      const [data, meta] = await Promise.all([
+        getGraphData(url, kind),
+        getGraphMeta(img)
+      ]);
+      if (!data) {
+        hideGraphTooltip();
+        return;
+      }
+      const rect = img.getBoundingClientRect();
+      const pad = meta?.pad || plotPadding;
+      const innerLeft = rect.left + rect.width * (pad.left ?? plotPadding.left);
+      const innerRight = rect.right - rect.width * (pad.right ?? plotPadding.right);
+      const innerTop = rect.top + rect.height * (pad.top ?? plotPadding.top);
+      const innerBottom = rect.bottom - rect.height * (pad.bottom ?? plotPadding.bottom);
+      const innerWidth = Math.max(1, innerRight - innerLeft);
+      const innerHeight = Math.max(1, innerBottom - innerTop);
+      const clampedX = Math.max(innerLeft, Math.min(innerRight, clientX));
+      const xRatio = (clampedX - innerLeft) / innerWidth;
+
+      const xMin = meta?.xlim?.[0] ?? data.minX;
+      const xMax = meta?.xlim?.[1] ?? data.maxX;
+      const yMin = meta?.ylim?.[0] ?? data.minY;
+      const yMax = meta?.ylim?.[1] ?? data.maxY;
+      const targetX = xMin + xRatio * (xMax - xMin);
+      const idx = findNearestIndex(data.x, targetX);
+      const decimalsX = tooltipConfig.decimalsX ?? 2;
+      const decimalsY = tooltipConfig.decimals[kind] ?? 2;
+      const unit = tooltipConfig.units[kind] ?? "";
+      const title = img.dataset.title || img.alt || "Grafik";
+      const xVal = data.x[idx];
+      const yVal = data.y[idx];
+      const xRatioVal = xMax !== xMin ? (xVal - xMin) / (xMax - xMin) : 0.5;
+      const yRatioVal = yMax !== yMin ? (yVal - yMin) / (yMax - yMin) : 0.5;
+      const xPixel = innerLeft + clamp01(xRatioVal) * innerWidth;
+      const yPixel = innerBottom - clamp01(yRatioVal) * innerHeight;
+
+      if (graphMarkerLine) {
+        graphMarkerLine.style.left = `${xPixel}px`;
+        graphMarkerLine.style.top = `${innerTop}px`;
+        graphMarkerLine.style.height = `${innerHeight}px`;
+        graphMarkerLine.classList.add("show");
+        graphMarkerLine.setAttribute("aria-hidden", "false");
+      }
+      if (graphMarkerDot) {
+        graphMarkerDot.style.left = `${xPixel}px`;
+        graphMarkerDot.style.top = `${yPixel}px`;
+        graphMarkerDot.classList.add("show");
+        graphMarkerDot.setAttribute("aria-hidden", "false");
+      }
+
+      graphTooltip.innerHTML = `
+        <div class="tt-title">${title}</div>
+        <div class="tt-row"><span>${data.xLabel}</span><b>${xVal.toFixed(decimalsX)}</b></div>
+        <div class="tt-row"><span>${data.yLabel}</span><b>${yVal.toFixed(decimalsY)}${unit ? " " + unit : ""}</b></div>
+      `;
+      graphTooltip.classList.add("show");
+      graphTooltip.setAttribute("aria-hidden", "false");
+      const tooltipRect = graphTooltip.getBoundingClientRect();
+      let left = clientX + 14;
+      let top = clientY + 14;
+      if (left + tooltipRect.width > window.innerWidth - 8) {
+        left = clientX - tooltipRect.width - 14;
+      }
+      if (top + tooltipRect.height > window.innerHeight - 8) {
+        top = clientY - tooltipRect.height - 14;
+      }
+      graphTooltip.style.left = `${left}px`;
+      graphTooltip.style.top = `${top}px`;
+    }
+
+    function hideGraphTooltip() {
+      if (!graphTooltip) return;
+      graphTooltip.classList.remove("show");
+      graphTooltip.setAttribute("aria-hidden", "true");
+      if (graphMarkerLine) {
+        graphMarkerLine.classList.remove("show");
+        graphMarkerLine.setAttribute("aria-hidden", "true");
+      }
+      if (graphMarkerDot) {
+        graphMarkerDot.classList.remove("show");
+        graphMarkerDot.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    function bindGraphThumbs() {
+      document.querySelectorAll(".graph-thumb").forEach((img) => {
+        if (img.dataset.bound === "1") return;
+        img.dataset.bound = "1";
+        img.addEventListener("mouseenter", (event) => {
+          showGraphTooltip(img, event.clientX, event.clientY);
+        });
+        img.addEventListener("mousemove", (event) => {
+          showGraphTooltip(img, event.clientX, event.clientY);
+        });
+        img.addEventListener("mouseleave", () => {
+          hideGraphTooltip();
+        });
+        img.addEventListener("touchstart", (event) => {
+          const touch = event.touches[0];
+          if (touch) showGraphTooltip(img, touch.clientX, touch.clientY);
+        }, { passive: true });
+        img.addEventListener("touchmove", (event) => {
+          const touch = event.touches[0];
+          if (touch) showGraphTooltip(img, touch.clientX, touch.clientY);
+        }, { passive: true });
+        img.addEventListener("touchend", () => {
+          hideGraphTooltip();
+        }, { passive: true });
+      });
+    }
 
     function updateImagesForFreq(freqValue) {
       const urls = freqImageUrls?.[freqValue];
@@ -158,6 +455,43 @@
       if (imgPola) imgPola.src = urls.pola;
       if (imgReturnLoss) imgReturnLoss.src = urls.return_loss;
       if (imgVswr) imgVswr.src = urls.vswr;
+
+      const graphUrls = freqGraphUrls?.[freqValue];
+      if (graphUrls) {
+        if (imgGraphGain) imgGraphGain.src = graphUrls.gain;
+        if (imgGraphReturnLoss) imgGraphReturnLoss.src = graphUrls.return_loss;
+        if (imgGraphVswr) imgGraphVswr.src = graphUrls.vswr;
+      }
+
+      const graphUrlsAwr = freqGraphUrlsAwr?.[freqValue];
+      if (graphUrlsAwr) {
+        if (imgGraphGainAwr) imgGraphGainAwr.src = graphUrlsAwr.gain;
+        if (imgGraphReturnLossAwr) imgGraphReturnLossAwr.src = graphUrlsAwr.return_loss;
+        if (imgGraphVswrAwr) imgGraphVswrAwr.src = graphUrlsAwr.vswr;
+        if (graphUrlsAwr.pola) {
+          if (imgGraphPolaAwr) imgGraphPolaAwr.src = graphUrlsAwr.pola;
+          if (wrapGraphPolaAwr) wrapGraphPolaAwr.style.display = "";
+        } else {
+          if (wrapGraphPolaAwr) wrapGraphPolaAwr.style.display = "none";
+        }
+      }
+
+      const graphDataUrls = freqGraphDataUrls?.[freqValue];
+      if (graphDataUrls) {
+        if (imgGraphGain) imgGraphGain.dataset.txt = graphDataUrls.gain || "";
+        if (imgGraphReturnLoss) imgGraphReturnLoss.dataset.txt = graphDataUrls.return_loss || "";
+        if (imgGraphVswr) imgGraphVswr.dataset.txt = graphDataUrls.vswr || "";
+      }
+
+      const graphDataUrlsAwr = freqGraphDataUrlsAwr?.[freqValue];
+      if (graphDataUrlsAwr) {
+        if (imgGraphGainAwr) imgGraphGainAwr.dataset.txt = graphDataUrlsAwr.gain || "";
+        if (imgGraphReturnLossAwr) imgGraphReturnLossAwr.dataset.txt = graphDataUrlsAwr.return_loss || "";
+        if (imgGraphVswrAwr) imgGraphVswrAwr.dataset.txt = graphDataUrlsAwr.vswr || "";
+        if (imgGraphPolaAwr) imgGraphPolaAwr.dataset.txt = graphDataUrlsAwr.pola || "";
+      }
+
+      refreshGraphThumbs();
     }
 
     function setResultMessage(text) {
@@ -172,11 +506,12 @@
       resultArea.classList.remove("b-placeholder");
       resultArea.classList.add("result-list");
       resultArea.innerHTML = `
-        <div class="r"><span>Wo</span><b>${hasil.wo.toFixed(2)} mm</b></div>
+        <div class="r"><span>Wf</span><b>${hasil.wf.toFixed(2)} mm</b></div>
         <div class="r"><span>lf</span><b>${hasil.lf_mm.toFixed(2)} mm</b></div>
         <div class="r"><span>a</span><b>${hasil.a_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>ws</span><b>${hasil.ws_mm.toFixed(2)} mm</b></div>
-        <div class="r"><span>ls</span><b>${hasil.ls_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>wg</span><b>${hasil.wg_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>lg</span><b>${hasil.lg_mm.toFixed(2)} mm</b></div>
+        <div class="r"><span>Ht</span><b>${hasil.ht_mm.toFixed(2)} mm</b></div>
       `;
     }
 
@@ -200,6 +535,7 @@
           if (imgPola) imgPola.src = data.imgs?.pola || data.img_d;
           if (imgReturnLoss) imgReturnLoss.src = data.imgs?.return_loss;
           if (imgVswr) imgVswr.src = data.imgs?.vswr;
+          updateImagesForFreq(freqSelect?.value);
         } catch (err) {
           setResultMessage("Gagal menghubungi server.");
         }
@@ -212,8 +548,53 @@
       });
       updateImagesForFreq(freqSelect.value);
     }
+
+        function openImgModal(img) {
+      if (!imgModal || !imgModalImg || !imgModalTitle || !img) return;
+      const title = img.dataset.title || img.alt || "Gambar";
+      imgModalImg.src = img.src;
+      imgModalImg.alt = title;
+      imgModalTitle.textContent = title;
+      imgModal.setAttribute("aria-hidden", "false");
+      imgModal.classList.add("open");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeImgModal() {
+      if (!imgModal || !imgModalImg) return;
+      imgModal.classList.remove("open");
+      imgModal.setAttribute("aria-hidden", "true");
+      imgModalImg.src = "";
+      document.body.classList.remove("modal-open");
+    }
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.dataset?.close) {
+        closeImgModal();
+        return;
+      }
+      if (target.classList.contains("img-popup")) {
+        openImgModal(target);
+      }
+    });
+    function refreshGraphThumbs() {
+      document.querySelectorAll(".graph-thumb").forEach((img) => {
+        const title = img.dataset.title || img.alt || "Grafik";
+        img.dataset.title = title;
+      });
+      bindGraphThumbs();
+    }
+
+    refreshGraphThumbs();
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
