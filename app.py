@@ -5,7 +5,7 @@ import sys
 import re
 import urllib.request
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
 
 
 app = Flask(__name__)
@@ -129,7 +129,7 @@ def drive_img_url(rel_path: str) -> str | None:
     file_id = drive_img_file_id(rel_path)
     if not file_id:
         return None
-    return drive_file_url(file_id, export="view")
+    return url_for("drive_img", rel_path=rel_path)
 
 
 def drive_txt_file_id(freq_ghz: float, source: str, kind: str) -> str | None:
@@ -416,6 +416,27 @@ maybe_sync_on_start()
 
 
 
+
+
+
+@app.route("/drive/img/<path:rel_path>")
+def drive_img(rel_path: str):
+    if not USE_DRIVE_ASSETS:
+        return "", 404
+    file_id = drive_img_file_id(rel_path)
+    if not file_id:
+        return "", 404
+    data = fetch_drive_file_bytes(file_id)
+    if data is None:
+        return "", 502
+    ext = rel_path.lower().rsplit(".", 1)[-1] if "." in rel_path else ""
+    if ext == "png":
+        mime = "image/png"
+    elif ext in {"jpg", "jpeg"}:
+        mime = "image/jpeg"
+    else:
+        mime = "application/octet-stream"
+    return Response(data, mimetype=mime, headers={"Cache-Control": "public, max-age=86400"})
 
 @app.route("/drive/txt/<source>/<freq>/<kind>")
 def drive_txt(source: str, freq: str, kind: str):
