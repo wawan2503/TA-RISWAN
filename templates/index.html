@@ -116,16 +116,16 @@
         <div class="section-title">Grafik AWR (File TXT)</div>
         <div class="plots-grid graphs-full" aria-label="Grafik AWR">
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls_awr.gain) }}" alt="Grafik Gain (AWR)" id="imgGraphGainAwr" class="graph-thumb" data-title="Grafik Gain (AWR)" data-kind="gain" data-txt="{{ graph_data_urls_awr.gain or '' }}">
+            <img src="{{ graph_urls_awr.gain or '' }}" alt="Grafik Gain (AWR)" id="imgGraphGainAwr" class="graph-thumb" data-title="Grafik Gain (AWR)" data-kind="gain" data-txt="{{ graph_data_urls_awr.gain or '' }}" data-meta="{{ graph_meta_urls_awr.gain or '' }}">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls_awr.return_loss) }}" alt="Grafik Return Loss (AWR)" id="imgGraphReturnLossAwr" class="graph-thumb" data-title="Grafik Return Loss (AWR)" data-kind="return_loss" data-txt="{{ graph_data_urls_awr.return_loss or '' }}">
+            <img src="{{ graph_urls_awr.return_loss or '' }}" alt="Grafik Return Loss (AWR)" id="imgGraphReturnLossAwr" class="graph-thumb" data-title="Grafik Return Loss (AWR)" data-kind="return_loss" data-txt="{{ graph_data_urls_awr.return_loss or '' }}" data-meta="{{ graph_meta_urls_awr.return_loss or '' }}">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls_awr.vswr) }}" alt="Grafik VSWR (AWR)" id="imgGraphVswrAwr" class="graph-thumb" data-title="Grafik VSWR (AWR)" data-kind="vswr" data-txt="{{ graph_data_urls_awr.vswr or '' }}">
+            <img src="{{ graph_urls_awr.vswr or '' }}" alt="Grafik VSWR (AWR)" id="imgGraphVswrAwr" class="graph-thumb" data-title="Grafik VSWR (AWR)" data-kind="vswr" data-txt="{{ graph_data_urls_awr.vswr or '' }}" data-meta="{{ graph_meta_urls_awr.vswr or '' }}">
           </div>
           <div class="box thumb-box" id="wrapGraphPolaAwr" {% if not graph_urls_awr.pola %}style="display:none"{% endif %}>
-            <img src="{{ url_for('static', filename=graph_urls_awr.pola) if graph_urls_awr.pola else '' }}" alt="Grafik Pola (AWR)" id="imgGraphPolaAwr" class="graph-thumb" data-title="Grafik Pola (AWR)" data-kind="pola" data-txt="{{ graph_data_urls_awr.pola or '' }}">
+            <img src="{{ graph_urls_awr.pola if graph_urls_awr.pola else '' }}" alt="Grafik Pola (AWR)" id="imgGraphPolaAwr" class="graph-thumb" data-title="Grafik Pola (AWR)" data-kind="pola" data-txt="{{ graph_data_urls_awr.pola or '' }}" data-meta="{{ graph_meta_urls_awr.pola or '' }}">
           </div>
         </div>
 
@@ -135,34 +135,34 @@
       <div class="right">
         <div class="section-title">Gambar Antena</div>
         <div class="box c-box">
-          <img src="{{ url_for('static', filename=img_c) }}" alt="Gambar Antena (C)" id="imgC" class="img-popup" data-title="Gambar Antena">
+          <img src="{{ img_c or '' }}" alt="Gambar Antena (C)" id="imgC" class="img-popup" data-title="Gambar Antena">
         </div>
 
         <div class="plots-grid" aria-label="Gambar hasil CST">
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_gain) }}" alt="Gain" id="imgGain" class="img-popup" data-title="Gain">
+            <img src="{{ img_gain or '' }}" alt="Gain" id="imgGain" class="img-popup" data-title="Gain">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_pola) }}" alt="Pola radiasi" id="imgPola" class="img-popup" data-title="Pola Radiasi">
+            <img src="{{ img_pola or '' }}" alt="Pola radiasi" id="imgPola" class="img-popup" data-title="Pola Radiasi">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_return_loss) }}" alt="Return Loss" id="imgReturnLoss" class="img-popup" data-title="Return Loss">
+            <img src="{{ img_return_loss or '' }}" alt="Return Loss" id="imgReturnLoss" class="img-popup" data-title="Return Loss">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=img_vswr) }}" alt="VSWR" id="imgVswr" class="img-popup" data-title="VSWR">
+            <img src="{{ img_vswr or '' }}" alt="VSWR" id="imgVswr" class="img-popup" data-title="VSWR">
           </div>
         </div>
 
         <div class="section-title">Grafik CST (File TXT)</div>
         <div class="plots-grid graphs-full" aria-label="Grafik CST">
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls.gain) }}" alt="Grafik Gain (CST)" id="imgGraphGain" class="graph-thumb" data-title="Grafik Gain (CST)" data-kind="gain" data-txt="{{ graph_data_urls.gain or '' }}">
+            <img src="{{ graph_urls.gain or '' }}" alt="Grafik Gain (CST)" id="imgGraphGain" class="graph-thumb" data-title="Grafik Gain (CST)" data-kind="gain" data-txt="{{ graph_data_urls.gain or '' }}" data-meta="{{ graph_meta_urls.gain or '' }}">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls.return_loss) }}" alt="Grafik Return Loss (CST)" id="imgGraphReturnLoss" class="graph-thumb" data-title="Grafik Return Loss (CST)" data-kind="return_loss" data-txt="{{ graph_data_urls.return_loss or '' }}">
+            <img src="{{ graph_urls.return_loss or '' }}" alt="Grafik Return Loss (CST)" id="imgGraphReturnLoss" class="graph-thumb" data-title="Grafik Return Loss (CST)" data-kind="return_loss" data-txt="{{ graph_data_urls.return_loss or '' }}" data-meta="{{ graph_meta_urls.return_loss or '' }}">
           </div>
           <div class="box thumb-box">
-            <img src="{{ url_for('static', filename=graph_urls.vswr) }}" alt="Grafik VSWR (CST)" id="imgGraphVswr" class="graph-thumb" data-title="Grafik VSWR (CST)" data-kind="vswr" data-txt="{{ graph_data_urls.vswr or '' }}">
+            <img src="{{ graph_urls.vswr or '' }}" alt="Grafik VSWR (CST)" id="imgGraphVswr" class="graph-thumb" data-title="Grafik VSWR (CST)" data-kind="vswr" data-txt="{{ graph_data_urls.vswr or '' }}" data-meta="{{ graph_meta_urls.vswr or '' }}">
           </div>
         </div>
       </div>
@@ -205,6 +205,8 @@
     const freqGraphUrlsAwr = {{ freq_graph_urls_awr | tojson }};
     const freqGraphDataUrls = {{ freq_graph_data_urls | tojson }};
     const freqGraphDataUrlsAwr = {{ freq_graph_data_urls_awr | tojson }};
+    const freqGraphMetaUrls = {{ freq_graph_meta_urls | tojson }};
+    const freqGraphMetaUrlsAwr = {{ freq_graph_meta_urls_awr | tojson }};
     const graphTooltip = document.getElementById("graphTooltip");
     const graphMarkerLine = document.getElementById("graphMarkerLine");
     const graphMarkerDot = document.getElementById("graphMarkerDot");
@@ -238,6 +240,8 @@
 
     function graphMetaUrlForImg(img) {
       if (!img) return "";
+      const meta = img.dataset.meta;
+      if (meta) return meta;
       const src = img.getAttribute("src") || "";
       if (!src) return "";
       const clean = src.split("?")[0];
@@ -483,12 +487,27 @@
         if (imgGraphVswr) imgGraphVswr.dataset.txt = graphDataUrls.vswr || "";
       }
 
+      const graphMetaUrls = freqGraphMetaUrls?.[freqValue];
+      if (graphMetaUrls) {
+        if (imgGraphGain) imgGraphGain.dataset.meta = graphMetaUrls.gain || "";
+        if (imgGraphReturnLoss) imgGraphReturnLoss.dataset.meta = graphMetaUrls.return_loss || "";
+        if (imgGraphVswr) imgGraphVswr.dataset.meta = graphMetaUrls.vswr || "";
+      }
+
       const graphDataUrlsAwr = freqGraphDataUrlsAwr?.[freqValue];
       if (graphDataUrlsAwr) {
         if (imgGraphGainAwr) imgGraphGainAwr.dataset.txt = graphDataUrlsAwr.gain || "";
         if (imgGraphReturnLossAwr) imgGraphReturnLossAwr.dataset.txt = graphDataUrlsAwr.return_loss || "";
         if (imgGraphVswrAwr) imgGraphVswrAwr.dataset.txt = graphDataUrlsAwr.vswr || "";
         if (imgGraphPolaAwr) imgGraphPolaAwr.dataset.txt = graphDataUrlsAwr.pola || "";
+      }
+
+      const graphMetaUrlsAwr = freqGraphMetaUrlsAwr?.[freqValue];
+      if (graphMetaUrlsAwr) {
+        if (imgGraphGainAwr) imgGraphGainAwr.dataset.meta = graphMetaUrlsAwr.gain || "";
+        if (imgGraphReturnLossAwr) imgGraphReturnLossAwr.dataset.meta = graphMetaUrlsAwr.return_loss || "";
+        if (imgGraphVswrAwr) imgGraphVswrAwr.dataset.meta = graphMetaUrlsAwr.vswr || "";
+        if (imgGraphPolaAwr) imgGraphPolaAwr.dataset.meta = graphMetaUrlsAwr.pola || "";
       }
 
       refreshGraphThumbs();
